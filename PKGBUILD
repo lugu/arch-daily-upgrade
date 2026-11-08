@@ -20,7 +20,7 @@ pre_remove() {
 EOF
 
 pkgname=arch-daily-upgrade
-pkgver=6.7
+pkgver=6.8
 pkgrel=1
 pkgdesc="Fully automated daily system upgrade (Official and AUR) for Arch Linux using native systemd"
 arch=('any')
@@ -28,12 +28,12 @@ url=""
 license=('GPL')
 depends=('pacman')
 optdepends=('yay: AUR package support' 'yay-bin: Pre-compiled AUR package support')
-backup=('usr/local/bin/arch-daily-upgrade.sh')
+backup=('usr/bin/arch-daily-upgrade.sh')
 install=arch-daily-upgrade.install
 
 package() {
   # 1. Create the upgrade script with clear operational logging
-  install -Dm755 /dev/stdin "$pkgdir/usr/local/bin/arch-daily-upgrade.sh" <<'EOF'
+  install -Dm755 /dev/stdin "$pkgdir/usr/bin/arch-daily-upgrade.sh" <<'EOF'
 #!/bin/bash
 LOG_TAG="[arch-daily-upgrade]"
 echo "$LOG_TAG Starting daily system upgrade at $(date)"
@@ -73,7 +73,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/arch-daily-upgrade.sh
+ExecStart=/usr/bin/arch-daily-upgrade.sh
 EOF
 
   # 3. Create the systemd timer unit (4 AM + 1-hour randomized jitter)
