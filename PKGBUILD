@@ -20,13 +20,13 @@ pre_remove() {
 EOF
 
 pkgname=arch-daily-upgrade
-pkgver=6.8
+pkgver=6.9
 pkgrel=1
 pkgdesc="Fully automated daily system upgrade (Official and AUR) for Arch Linux using native systemd"
 arch=('any')
 url=""
 license=('GPL')
-depends=('pacman')
+depends=('pacman' 'sudo')
 optdepends=('yay: AUR package support' 'yay-bin: Pre-compiled AUR package support')
 backup=('usr/bin/arch-daily-upgrade.sh')
 install=arch-daily-upgrade.install
@@ -42,13 +42,13 @@ echo "$LOG_TAG Starting daily system upgrade at $(date)"
 echo "$LOG_TAG Running official pacman upgrade..."
 pacman -Syu --noconfirm
 echo "$LOG_TAG Pacman upgrade complete. Cleaning package cache..."
-paccache -r -k 2
+yes | pacman -Scc
 
 # Upgrade AUR packages if yay/yay-bin is available using a temporary runtime home
 BUILD_USER="pkgbuilder"
 if command -v yay &> /dev/null && id "$BUILD_USER" &>/dev/null; then
     echo "$LOG_TAG yay detected. Preparing temporary build environment for $BUILD_USER..."
-    TEMP_HOME=$(mktemp -d)
+    TEMP_HOME=$(mktemp -d -p /var/tmp)
     chown "$BUILD_USER":"$BUILD_USER" "$TEMP_HOME"
 
     echo "$LOG_TAG Running AUR upgrade via yay..."
@@ -56,7 +56,7 @@ if command -v yay &> /dev/null && id "$BUILD_USER" &>/dev/null; then
 
     echo "$LOG_TAG AUR upgrade complete. Cleaning temporary home and package cache..."
     rm -rf "$TEMP_HOME"
-    paccache -r -k 2
+    yes | pacman -Scc
 else
     echo "$LOG_TAG yay not found or build user missing, skipping AUR upgrade."
 fi
@@ -89,5 +89,11 @@ RandomizedDelaySec=1h
 
 [Install]
 WantedBy=timers.target
+EOF
+
+  # 4. Grant passwordless pacman execution to pkgbuilder for yay/makepkg
+  install -dm750 "$pkgdir/etc/sudoers.d"
+  install -m440 /dev/stdin "$pkgdir/etc/sudoers.d/pkgbuilder" <<'EOF'
+pkgbuilder ALL=(ALL) NOPASSWD: /usr/bin/pacman
 EOF
 }
