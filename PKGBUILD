@@ -20,7 +20,7 @@ pre_remove() {
 EOF
 
 pkgname=arch-daily-upgrade
-pkgver=6.9
+pkgver=7.0
 pkgrel=1
 pkgdesc="Fully automated daily system upgrade (Official and AUR) for Arch Linux using native systemd"
 arch=('any')
@@ -83,8 +83,6 @@ Description=Run daily Arch Linux upgrade at 4 AM with jitter
 
 [Timer]
 OnCalendar=*-*-* 04:00:00
-Persistent=true
-WakeSystem=true
 RandomizedDelaySec=1h
 
 [Install]
